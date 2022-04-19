@@ -7,7 +7,7 @@ require(ggplot2)
 
 #####
 #load data
-data.all <- read.table("Data_Raw/dataall_meta_man_2022-01-26.txt", sep=",") #data with metabarcoding and manual sorting; only has 128 samples
+data.all <- read.table("Data_Raw/dataall_meta_man_2022-04-18.txt", sep=",") #data with metabarcoding and manual sorting; only has 128 samples
 sk.final <- read.table(file="Data_Raw/spilogale_gracilis_metabarcoding_manual_byphylum_2022-01-25.txt", sep=",", header=T) #NA values in rows for MT904 and F37-193, only clupea
 sk.final <- sk.final[!sk.final$ScatID %in% c("MT904","F37-193"),] #remove MT904 and F37-193 from sk.final, only clupea
 
