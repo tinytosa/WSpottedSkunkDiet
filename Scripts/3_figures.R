@@ -183,8 +183,10 @@ bugsamples #109 samples
 # data.all[data.all$p == "Streptophyta",]$c <- "plant"
 
 data.long <- ddply(data.all, .(sample, superk, k, p, c), nrow)
+data.long[data.long$c == "",]$c <- data.long[data.long$c == "",]$p #some rows missing taxonomic class information
+data.long <- data.long[!duplicated(data.long[,c("sample","c")]),]
 data.wide <- tidyr::spread(data.long[,c("sample","c","V1")], c, V1, fill=0)
-#data.wide$pl <- data.wide$Magnoliopsida + data.wide$Pinopsida + data.wide$Polypodiopsida
+data.wide$plant <- data.wide$Magnoliopsida + data.wide$Pinopsida + data.wide$Polypodiopsida + data.wide$Streptophyta
 data.wide$myriapoda <- data.wide$Chilopoda + data.wide$Diplopoda
 data.wide <- data.wide[,c("sample","Amphibia","Aves","Mammalia","Reptilia","Gastropoda","Arachnida","myriapoda","Insecta","plant")]
 
@@ -230,8 +232,11 @@ s.tab$sciname <- as.character(s.tab$s)
 s.tab[s.tab$sciname == "",]$sciname <- paste(s.tab[s.tab$sciname == "",]$g, "sp", sep=" ")
 s.tab[s.tab$sciname == " sp",]$sciname <- paste(s.tab[s.tab$sciname == " sp",]$o, s.tab[s.tab$sciname == " sp",]$sciname, sep="")
 s.tab[s.tab$sciname == " sp",]$sciname <- paste(s.tab[s.tab$sciname == " sp",]$c, s.tab[s.tab$sciname == " sp",]$sciname, sep="")
-s.tab$sciname <- factor(s.tab$sciname, levels=s.tab[order(s.tab$finalrra_vert, decreasing = F),]$sciname) #cannot have duplicates
-#s.tab$sciname <- factor(s.tab$sciname, levels=s.tab[order(s.tab$finalrra_all, decreasing = F),]$sciname)
+s.tab$sciname <- factor(s.tab$sciname, levels=s.tab[order(s.tab$finalrra_vert, decreasing = F),]$sciname) #order by vert RRA
+#s.tab$sciname <- factor(s.tab$sciname, levels=s.tab[order(s.tab$c, decreasing = F),]$sciname) #order by class
+#s.tab$sciname <- factor(s.tab$sciname, levels=s.tab[order(s.tab$c, s.tab$finalrra_vert),]$sciname) #order by class, then by vert RRA
+#s.tab$sciname <- factor(s.tab$sciname, levels=s.tab[order(s.tab$finalrra_all, decreasing = F),]$sciname) #order by total RRA
+
 rra <- ggplot(s.tab[!is.na(s.tab$finalrra_all),], aes(x=sciname, y=finalrra_vert, fill=c)) + 
   #rra <- ggplot(s.tab, aes(x=sciname, y=finalrra_all, fill=c)) + 
   geom_bar(stat="identity") + theme_bw(base_size=15) + coord_flip() +
@@ -243,6 +248,7 @@ rra
 # ggsave(rra, filename="Figures/Spilogale_gracilis_rra_vertebrate.tiff", height=8, width=6, units="in", dpi=300, compression="lzw")
 
 s.tab$sciname <- factor(s.tab$sciname, levels=s.tab[order(s.tab$focc, decreasing = F),]$sciname)
+#s.tab$sciname <- factor(s.tab$sciname, levels=s.tab[order(s.tab$c, s.tab$focc),]$sciname) #order by class, then by focc
 focc <- ggplot(s.tab[!s.tab$o == "",], aes(x=sciname, y=focc, fill=c)) + 
   geom_bar(stat="identity") + theme_bw(base_size=15) + coord_flip() +
   scale_fill_manual(name="prey class", values=vert.colors) + 
